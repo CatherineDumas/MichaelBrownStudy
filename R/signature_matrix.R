@@ -1,4 +1,4 @@
-# get the signers of particular petitions
+# make a 'signature x petition' matrix
 
 # run this command in the terminal first, with your account!:
 # ssh -L 8888:projpet.rit.albany.edu:3306 youraccount@projpet.rit.albany.edu -N
