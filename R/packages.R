@@ -2,7 +2,8 @@
 
 packages = c(
     "RMySQL", # to connect to the database
-    "Matrix" # lightweight sparse matrices
+    "Matrix", # lightweight sparse matrices
+    "reshape2" # easy way to reorganize data
 )
 
 install.packages(packages)
