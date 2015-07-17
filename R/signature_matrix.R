@@ -68,7 +68,7 @@ for (petition in petitions) {
 
 # write file in market basket csv format
 library(reshape2)
-file_name = "gun_control_basket.csv"
+file_name = "mbrown.basket"
 # convert from long to wide/matrix format
 sig_mat = dcast(signatures2, signer ~ pet_id)
 # get rid of the known duplicates-- check every row for an entry > 1
@@ -80,8 +80,8 @@ if (file.exists(file_name)) file.remove(file_name)
 for (n in 1:nrow(sig_mat2)) {
   # list of petitions where the matrix entry is not zero
   signed = paste(pet_ids[as.logical(sig_mat2[n, -1])],
-      collapse = ", ")
-  txt = paste0(sig_mat2$signer[n], ", ", signed, "\n")
+      collapse = ",")
+  txt = paste0(n, " ", signed, "\n")
   cat(txt, file = file_name, append = T)
 }
 
