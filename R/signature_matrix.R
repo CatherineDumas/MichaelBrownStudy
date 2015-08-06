@@ -12,20 +12,11 @@ password = "root"
 petitions = as.vector(read.csv("MBS_Episode_1.txt", header = F,
     stringsAsFactors = F)[,1 ])
 # Darren Wilson petitions
-petitions = c(
-    "5473ea6d7043011327000000",
-    "5473f8dfa9a0b1df52000000",
-    "546bf9d96889387153000002",
-    "5474810e704301c769000000",
-    "54750a48688938563e000000",
-    "547523f0ee140f5728000000",
-    "5475da4d704301dc04000000",
-    "5475037000e579523c000000",
-    "5475fdbeeab72a3568000000",
-    "54763b452f2c88ac41000000",
-    "54772ad8eab72a821c000000",
-    "547882e56ce61c9a50000000"
-)
+petitions2 = as.vector(read.csv("MBS_Episode_2.txt", header = F,
+    stringsAsFactors = F)[,1 ])
+# last petitions
+petitions3 = "54e318e6ee140f5853000000"
+petitions = c(petitions, petitions2, petitions3)
 
 
 # querying the database
@@ -75,7 +66,7 @@ signatures2$pet_id = match(signatures2$petition_id, petitions)
 
 # write file in market basket csv format
 library(reshape2)
-file_name = "dwilson.basket"
+file_name = "combined.basket"
 # convert from long to wide/matrix format
 sig_mat = dcast(signatures2, signer ~ pet_id)
 # get rid of the known duplicates-- check every row for an entry > 1
@@ -129,7 +120,7 @@ write.csv(as.matrix(m) + 0, "matrix.csv")
 
 # g02.nx file
 
-file_name = "g04.nx"
+file_name = "combined_g04.nx"
 # don't want to add to an existing file
 if (file.exists(file_name)) file.remove(file_name)
 
@@ -138,15 +129,17 @@ if (file.exists(file_name)) file.remove(file_name)
 ## sig_mat2 = sig_mat[rowSums(sig_mat[, -1]) >= 2, ]
 ## sig_mat3 = sig_mat[rowSums(sig_mat[, -1]) >= 3, ]
 sig_mat4 = sig_mat[rowSums(sig_mat[, -1]) >= 4, ]
+sig_mat5 = sig_mat[rowSums(sig_mat[, -1]) >= 5, ]
+sig_mat6 = sig_mat[rowSums(sig_mat[, -1]) >= 6, ]
 
 x = 1
-for (n1 in 1:nrow(sig_mat4)) {
+for (n1 in 1:nrow(sig_mat6)) {
   # looking at all the rows after the current row, so I don't
   # double-count the edges
-  for (n2 in (1:nrow(sig_mat4))[1:nrow(sig_mat4) > x]) {
+  for (n2 in (1:nrow(sig_mat6))[1:nrow(sig_mat6) > x]) {
     # do the signers have at least two petitions in common?
-    if (sum(sig_mat4[n1, -1] > 0 & sig_mat4[n2, -1] > 0) >= 4) {
-      txt = paste0(sig_mat4$signer[n1], "\t", sig_mat4$signer[n2], "\n")
+    if (sum(sig_mat6[n1, -1] > 0 & sig_mat6[n2, -1] > 0) >= 4) {
+      txt = paste0(sig_mat6$signer[n1], "\t", sig_mat6$signer[n2], "\n")
       cat(txt, file = file_name, append = T)
     }
   }
