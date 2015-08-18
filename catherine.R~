@@ -1,0 +1,69 @@
+# get the signers of particular petitions
+
+# run this command first:
+# ssh -L 8888:projpet.rit.albany.edu:3306 wm177874@projpet.rit.albany.edu -N
+
+user = "username"
+password = "password"
+
+
+petitions = read.csv("MBS_Episode_1.txt", stringsAsFactors = F)
+
+
+library(RMySQL)
+
+con = dbConnect(MySQL(), dbname = "wtp", user = user,
+    password = password, host = "127.0.0.1", port = 8888)
+
+query = paste0("select * from signature where petition_id in ('",
+    paste(petitions[, 1], collapse = "', '"), "')")
+signatures = dbGetQuery(con, query)
+
+signatures = signatures[signatures$zip != "", ]
+
+signatures$signer = paste(signatures$name, signatures$city,
+                          signatures$state, signatures$zip, sep = ", ")
+
+totals = table(signatures$signer)
+real_totals = totals[totals < 100]
+
+
+rel_signatures = signatures[signatures$signer %in% names(real_totals), ]
+
+# number of petitions
+petitions = unique(signatures$petition_id)
+npet = length(petitions)
+
+# number of signers (as far as I can tell)
+signers = unique(signatures$signer)
+nsign = length(signers)
+
+library(Matrix)
+m = sparseMatrix(i = match(signatures$signer, signers),
+                 j = match(signatures$petition_id, petitions),
+                 dims = c(nsign, npet), dimnames = list(signers, petitions))
+
+
+save(signatures, file = "signatures.RData")
+write.csv(signatures, file = "signatures.csv")
+
+dbDisconnect(con)
+
+
+
+
+
+
+# add the day
+library(lubridate)
+signatures$day = day(signatures$created)
+
+p1 = signatures[signatures$petition_id ==
+                  "54ac4a31eab72ae958000000", ]
+p2 = signatures[signatures$petition_id ==
+                  "554eb929a9a0b1300b000000", ]
+
+timeline = table(p1$day)
+t2 = table(p2$day)
+
+plot(t2, type = "l")
