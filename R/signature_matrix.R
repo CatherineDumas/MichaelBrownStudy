@@ -120,29 +120,35 @@ write.csv(as.matrix(m) + 0, "matrix.csv")
 
 # g02.nx file
 
-file_name = "combined_g04.nx"
-# don't want to add to an existing file
-if (file.exists(file_name)) file.remove(file_name)
+write_nx = function(sig_mat, n) {
+  file_name = paste0("combined_g0", n, ".nx")
+  # don't want to add to an existing file
+  if (file.exists(file_name)) file.remove(file_name)
 
-# get rid of signers that can't possibly have two petitions in common,
-# make things so much faster
-## sig_mat2 = sig_mat[rowSums(sig_mat[, -1]) >= 2, ]
-## sig_mat3 = sig_mat[rowSums(sig_mat[, -1]) >= 3, ]
-sig_mat4 = sig_mat[rowSums(sig_mat[, -1]) >= 4, ]
-sig_mat5 = sig_mat[rowSums(sig_mat[, -1]) >= 5, ]
-sig_mat6 = sig_mat[rowSums(sig_mat[, -1]) >= 6, ]
+  # get rid of signers that can't possibly have two petitions in common,
+  # make things so much faster
+  ## sig_mat2 = sig_mat[rowSums(sig_mat[, -1]) >= 2, ]
+  ## sig_mat3 = sig_mat[rowSums(sig_mat[, -1]) >= 3, ]
+  ## sig_mat4 = sig_mat[rowSums(sig_mat[, -1]) >= 4, ]
+  ## sig_mat5 = sig_mat[rowSums(sig_mat[, -1]) >= 5, ]
+  ## sig_mat6 = sig_mat[rowSums(sig_mat[, -1]) >= 6, ]
+  sig_mat_n = sig_mat[rowSums(sig_mat[, -1]) >= n, ]
+  print(paste0(nrow(sig_mat_n, " rows")))
 
-x = 1
-for (n1 in 1:nrow(sig_mat6)) {
-  # looking at all the rows after the current row, so I don't
-  # double-count the edges
-  for (n2 in (1:nrow(sig_mat6))[1:nrow(sig_mat6) > x]) {
-    # do the signers have at least two petitions in common?
-    if (sum(sig_mat6[n1, -1] > 0 & sig_mat6[n2, -1] > 0) >= 4) {
-      txt = paste0(sig_mat6$signer[n1], "\t", sig_mat6$signer[n2], "\n")
-      cat(txt, file = file_name, append = T)
+  x = 1
+  for (n1 in 1:nrow(sig_mat_n)) {
+    # looking at all the rows after the current row, so I don't
+    # double-count the edges
+    for (n2 in (1:nrow(sig_mat_n))[1:nrow(sig_mat_n) > x]) {
+      # do the signers have at least two petitions in common?
+      if (sum(sig_mat_n[n1, -1] > 0 & sig_mat_n[n2, -1] > 0) >= n) {
+        txt =
+          paste0(sig_mat_n$signer[n1], " ",
+                 sig_mat_n$signer[n2], "\n")
+        cat(txt, file = file_name, append = T)
+      }
     }
+    x = x + 1
+    if (x %% 100 == 0) print(x)
   }
-  x = x + 1
-  if (x %% 100 == 0) print(x)
 }
